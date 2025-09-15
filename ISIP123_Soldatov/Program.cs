@@ -8,7 +8,6 @@ while (!int.TryParse(Console.ReadLine(), out n) || n < 2 || n > 40)
 string[] names = new string[n];
 int[] prices = new int[n];
 
-// Ввод данных
 for (int i = 0; i < n; i++)
 {
     Console.WriteLine($"Введите данные для операции {i + 1} (формат: Название;Сумма):");
@@ -41,7 +40,7 @@ while (true)
 
     switch (choice)
     {
-        case "1": // Вывод данных
+        case "1": 
             Console.WriteLine("\nСписок трат:");
             for (int i = 0; i < n; i++)
             {
@@ -49,7 +48,7 @@ while (true)
             }
             break;
 
-        case "2": // Статистика
+        case "2":
             if (n > 0)
             {
                 int sum = 0, max = prices[0], min = prices[0];
@@ -68,18 +67,16 @@ while (true)
             }
             break;
 
-        case "3": // Пузырьковая сортировка
+        case "3":
             for (int i = 0; i < n - 1; i++)
             {
                 for (int j = 0; j < n - i - 1; j++)
                 {
                     if (prices[j] > prices[j + 1])
                     {
-                        // Swap prices
                         int tempPrice = prices[j];
                         prices[j] = prices[j + 1];
                         prices[j + 1] = tempPrice;
-                        // Swap names
                         string tempName = names[j];
                         names[j] = names[j + 1];
                         names[j + 1] = tempName;
@@ -89,7 +86,7 @@ while (true)
             Console.WriteLine("\nДанные отсортированы по цене.");
             break;
 
-        case "4": // Конвертация валюты
+        case "4": 
             Console.WriteLine("\nВыберите валюту или введите курс:");
             Console.WriteLine("1. USD (курс 90)");
             Console.WriteLine("2. EUR (курс 100)");
@@ -120,7 +117,7 @@ while (true)
             }
             break;
 
-        case "5": // Поиск по названию
+        case "5":
             Console.Write("Введите название для поиска: ");
             string search = Console.ReadLine().ToLower();
             bool found = false;
