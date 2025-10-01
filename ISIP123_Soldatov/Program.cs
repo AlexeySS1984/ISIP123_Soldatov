@@ -57,7 +57,7 @@ class Program
                     SearchBooks();
                     break;
                 case "4":
-                    //SortBooks();
+                    SortBooks();
                     break;
                 case "5":
                     //DisplayMinMaxPriceBooks();
@@ -236,6 +236,33 @@ class Program
 
         Console.WriteLine("Результаты поиска:");
         foreach (var book in results)
+        {
+            Console.WriteLine(book);
+        }
+    }
+    private static void SortBooks()
+    {
+        Console.WriteLine("Отсортировать по: 1. Названию, 2. Году");
+        string sortType = Console.ReadLine()?.Trim();
+
+        IEnumerable<Book> sortedBooks = books;
+
+        if (sortType == "1")
+        {
+            sortedBooks = books.OrderBy(b => b.Title);
+        }
+        else if (sortType == "2")
+        {
+            sortedBooks = books.OrderBy(b => b.Year);
+        }
+        else
+        {
+            Console.WriteLine("Неверный выбор.");
+            return;
+        }
+
+        Console.WriteLine("Отсортированные книги:");
+        foreach (var book in sortedBooks)
         {
             Console.WriteLine(book);
         }
