@@ -17,5 +17,20 @@
         public Genre Genre { get; set; }
         public int Year { get; set; }
         public decimal Price { get; set; }
+
+        public Book(int id, string title, string author, Genre genre, int year, decimal price)
+        {
+            Id = id;
+            Title = title;
+            Author = author;
+            Genre = genre;
+            Year = year;
+            Price = price;
+        }
+
+        public override string ToString()
+        {
+            return $"ID: {Id}, Title: {Title}, Author: {Author}, Genre: {Genre}, Year: {Year}, Price: {Price:C}";
+        }
     }
 }
