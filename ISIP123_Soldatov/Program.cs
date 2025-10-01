@@ -60,7 +60,7 @@ class Program
                     SortBooks();
                     break;
                 case "5":
-                    //DisplayMinMaxPriceBooks();
+                    DisplayMinMaxPriceBooks();
                     break;
                 case "6":
                     //GroupByAuthor();
@@ -95,7 +95,7 @@ class Program
         Console.WriteLine("2. Удалить книгу по ID");
         Console.WriteLine("3. Поиск книги (по названию, автору, или жанру)");
         Console.WriteLine("4. Отсортировать книги (по названиию или году)");
-        Console.WriteLine("5. Отобразить самые дорогие и самые дешевые книги");
+        Console.WriteLine("5. Отобразить самую дорогую и самую дешевую книги");
         Console.WriteLine("6. Сгруппировать книги по автору и количеству");
         Console.WriteLine("7. Выход");
         Console.Write("Введите ваш выбор: ");
@@ -266,5 +266,22 @@ class Program
         {
             Console.WriteLine(book);
         }
+    }
+    private static void DisplayMinMaxPriceBooks()
+    {
+        if (!books.Any())
+        {
+            Console.WriteLine("Нет книг в наличии.");
+            return;
+        }
+
+        Book maxPriceBook = books.MaxBy(b => b.Price);
+        Book minPriceBook = books.MinBy(b => b.Price);
+
+        Console.WriteLine("Самая дорогая книга:");
+        Console.WriteLine(maxPriceBook);
+
+        Console.WriteLine("Самая дешевая книга:");
+        Console.WriteLine(minPriceBook);
     }
 }
