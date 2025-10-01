@@ -51,7 +51,7 @@ class Program
                     AddBook();
                     break;
                 case "2":
-                    //DeleteBook();
+                    DeleteBook();
                     break;
                 case "3":
                     //SearchBooks();
@@ -145,8 +145,34 @@ class Program
 
             Book newBook = new Book(nextId++, title, author, genre, year, price);
             books.Add(newBook);
-            Console.WriteLine("Книга добавлена успешно:");
+            Console.WriteLine("Книга успешно добавлена:");
             Console.WriteLine(newBook);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Возникла ошибка: {ex.Message}");
+        }
+    }
+    private static void DeleteBook()
+    {
+        try
+        {
+            Console.Write("Введите ID книги, которую хотите удалить: ");
+            if (!int.TryParse(Console.ReadLine()?.Trim(), out int id) || id <= 0)
+            {
+                Console.WriteLine("Неверный ID.");
+                return;
+            }
+
+            Book bookToDelete = books.FirstOrDefault(b => b.Id == id);
+            if (bookToDelete == null)
+            {
+                Console.WriteLine("Книга не найдена.");
+                return;
+            }
+
+            books.Remove(bookToDelete);
+            Console.WriteLine("Книга успешно удалена.");
         }
         catch (Exception ex)
         {
