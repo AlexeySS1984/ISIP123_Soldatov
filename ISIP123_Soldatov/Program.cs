@@ -63,7 +63,7 @@ class Program
                     DisplayMinMaxPriceBooks();
                     break;
                 case "6":
-                    //GroupByAuthor();
+                    GroupByAuthor();
                     break;
                 case "7":
                     Console.WriteLine("Выход из программы. До свидания!");
@@ -96,7 +96,7 @@ class Program
         Console.WriteLine("3. Поиск книги (по названию, автору, или жанру)");
         Console.WriteLine("4. Отсортировать книги (по названиию или году)");
         Console.WriteLine("5. Отобразить самую дорогую и самую дешевую книги");
-        Console.WriteLine("6. Сгруппировать книги по автору и количеству");
+        Console.WriteLine("6. Сгруппировать книги по авторам и вывести количество книг каждого автора.");
         Console.WriteLine("7. Выход");
         Console.Write("Введите ваш выбор: ");
     }
@@ -283,5 +283,22 @@ class Program
 
         Console.WriteLine("Самая дешевая книга:");
         Console.WriteLine(minPriceBook);
+    }
+    private static void GroupByAuthor()
+    {
+        var groups = books.GroupBy(b => b.Author)
+                          .Select(g => new { Author = g.Key, Count = g.Count() });
+
+        if (!groups.Any())
+        {
+            Console.WriteLine("No books available.");
+            return;
+        }
+
+        Console.WriteLine("Books grouped by author:");
+        foreach (var group in groups)
+        {
+            Console.WriteLine($"Author: {group.Author}, Books: {group.Count}");
+        }
     }
 }
