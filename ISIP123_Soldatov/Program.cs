@@ -54,7 +54,7 @@ class Program
                     DeleteBook();
                     break;
                 case "3":
-                    //SearchBooks();
+                    SearchBooks();
                     break;
                 case "4":
                     //SortBooks();
@@ -177,6 +177,67 @@ class Program
         catch (Exception ex)
         {
             Console.WriteLine($"Возникла ошибка: {ex.Message}");
+        }
+    }
+    private static void SearchBooks()
+    {
+        Console.WriteLine("Поиск по: 1. Названию, 2. Автору, 3. Жанру");
+        string searchType = Console.ReadLine()?.Trim();
+
+        string query = string.Empty;
+        Genre? genre = null;
+
+        switch (searchType)
+        {
+            case "1":
+                Console.Write("Введите название: ");
+                query = Console.ReadLine()?.Trim().ToLower();
+                break;
+            case "2":
+                Console.Write("Введите автора: ");
+                query = Console.ReadLine()?.Trim().ToLower();
+                break;
+            case "3":
+                Console.WriteLine("Доступные жанры: " + string.Join(", ", Enum.GetNames(typeof(Genre))));
+                Console.Write("Введите жанр: ");
+                string genreInput = Console.ReadLine()?.Trim();
+                if (!Enum.TryParse<Genre>(genreInput, true, out Genre parsedGenre))
+                {
+                    Console.WriteLine("Неверный жанр.");
+                    return;
+                }
+                genre = parsedGenre;
+                break;
+            default:
+                Console.WriteLine("Неверный выбор.");
+                return;
+        }
+
+        IEnumerable<Book> results = books;
+
+        if (searchType == "1")
+        {
+            results = books.Where(b => b.Title.ToLower().Contains(query));
+        }
+        else if (searchType == "2")
+        {
+            results = books.Where(b => b.Author.ToLower().Contains(query));
+        }
+        else if (searchType == "3" && genre.HasValue)
+        {
+            results = books.Where(b => b.Genre == genre.Value);
+        }
+
+        if (!results.Any())
+        {
+            Console.WriteLine("Книги не найдены.");
+            return;
+        }
+
+        Console.WriteLine("Результаты поиска:");
+        foreach (var book in results)
+        {
+            Console.WriteLine(book);
         }
     }
 }
