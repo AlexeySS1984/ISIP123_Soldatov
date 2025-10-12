@@ -214,4 +214,245 @@ namespace UniversityManagementSystem
             return courses.Find(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
     }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            University university = new University();
+            bool running = true;
+
+            while (running)
+            {
+                Console.Clear();
+                Console.WriteLine("Система управления университетом");
+                Console.WriteLine("1. Добавить студента");
+                Console.WriteLine("2. Просмотреть информацию о студенте");
+                Console.WriteLine("3. Записать студента на курс");
+                Console.WriteLine("4. Просмотреть курсы студента");
+                Console.WriteLine("5. Добавить преподавателя");
+                Console.WriteLine("6. Просмотреть информацию о преподавателе");
+                Console.WriteLine("7. Назначить преподавателя на курс");
+                Console.WriteLine("8. Добавить курс");
+                Console.WriteLine("9. Просмотреть информацию о курсе");
+                Console.WriteLine("10. Просмотреть студентов на курсе");
+                Console.WriteLine("11. Просмотреть всех студентов");
+                Console.WriteLine("12. Просмотреть всех преподавателей");
+                Console.WriteLine("13. Просмотреть все курсы");
+                Console.WriteLine("14. Выход");
+                Console.Write("Выберите опцию: ");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        AddStudent(university);
+                        break;
+                    case "2":
+                        ViewStudentInfo(university);
+                        break;
+                    case "3":
+                        EnrollStudentInCourse(university);
+                        break;
+                    case "4":
+                        ViewStudentCourses(university);
+                        break;
+                    case "5":
+                        AddTeacher(university);
+                        break;
+                    case "6":
+                        ViewTeacherInfo(university);
+                        break;
+                    case "7":
+                        AssignTeacherToCourse(university);
+                        break;
+                    case "8":
+                        AddCourse(university);
+                        break;
+                    case "9":
+                        ViewCourseInfo(university);
+                        break;
+                    case "10":
+                        ViewStudentsInCourse(university);
+                        break;
+                    case "11":
+                        university.DisplayAllStudents();
+                        break;
+                    case "12":
+                        university.DisplayAllTeachers();
+                        break;
+                    case "13":
+                        university.DisplayAllCourses();
+                        break;
+                    case "14":
+                        running = false;
+                        break;
+                    default:
+                        Console.WriteLine("Неверная опция. Попробуйте снова.");
+                        break;
+                }
+
+                Console.WriteLine("Нажмите любую клавишу для продолжения...");
+                Console.ReadKey();
+            }
+        }
+
+        private static void AddStudent(University university)
+        {
+            Console.Write("Введите имя: ");
+            string name = Console.ReadLine();
+            Console.Write("Введите возраст: ");
+            int age = int.Parse(Console.ReadLine());
+            Console.Write("Введите контактную информацию: ");
+            string contact = Console.ReadLine();
+            Student student = new Student(name, age, contact);
+            university.AddStudent(student);
+            Console.WriteLine("Студент добавлен.");
+        }
+
+        private static void ViewStudentInfo(University university)
+        {
+            Console.Write("Введите имя студента: ");
+            string name = Console.ReadLine();
+            Student student = university.FindStudent(name);
+            if (student != null)
+            {
+                student.DisplayInfo();
+            }
+            else
+            {
+                Console.WriteLine("Студент не найден.");
+            }
+        }
+
+        private static void EnrollStudentInCourse(University university)
+        {
+            Console.Write("Введите имя студента: ");
+            string studentName = Console.ReadLine();
+            Student student = university.FindStudent(studentName);
+            if (student == null)
+            {
+                Console.WriteLine("Студент не найден.");
+                return;
+            }
+
+            Console.Write("Введите название курса: ");
+            string courseName = Console.ReadLine();
+            Course course = university.FindCourse(courseName);
+            if (course == null)
+            {
+                Console.WriteLine("Курс не найден.");
+                return;
+            }
+
+            student.EnrollInCourse(course);
+            Console.WriteLine("Студент записан на курс.");
+        }
+
+        private static void ViewStudentCourses(University university)
+        {
+            Console.Write("Введите имя студента: ");
+            string name = Console.ReadLine();
+            Student student = university.FindStudent(name);
+            if (student != null)
+            {
+                student.DisplayEnrolledCourses();
+            }
+            else
+            {
+                Console.WriteLine("Студент не найден.");
+            }
+        }
+
+        private static void AddTeacher(University university)
+        {
+            Console.Write("Введите имя: ");
+            string name = Console.ReadLine();
+            Console.Write("Введите возраст: ");
+            int age = int.Parse(Console.ReadLine());
+            Console.Write("Введите контактную информацию: ");
+            string contact = Console.ReadLine();
+            Teacher teacher = new Teacher(name, age, contact);
+            university.AddTeacher(teacher);
+            Console.WriteLine("Преподаватель добавлен.");
+        }
+
+        private static void ViewTeacherInfo(University university)
+        {
+            Console.Write("Введите имя преподавателя: ");
+            string name = Console.ReadLine();
+            Teacher teacher = university.FindTeacher(name);
+            if (teacher != null)
+            {
+                teacher.DisplayInfo();
+            }
+            else
+            {
+                Console.WriteLine("Преподаватель не найден.");
+            }
+        }
+
+        private static void AssignTeacherToCourse(University university)
+        {
+            Console.Write("Введите имя преподавателя: ");
+            string teacherName = Console.ReadLine();
+            Teacher teacher = university.FindTeacher(teacherName);
+            if (teacher == null)
+            {
+                Console.WriteLine("Преподаватель не найден.");
+                return;
+            }
+
+            Console.Write("Введите название курса: ");
+            string courseName = Console.ReadLine();
+            Course course = university.FindCourse(courseName);
+            if (course == null)
+            {
+                Console.WriteLine("Курс не найден.");
+                return;
+            }
+
+            teacher.AssignToCourse(course);
+            Console.WriteLine("Преподаватель назначен на курс.");
+        }
+
+        private static void AddCourse(University university)
+        {
+            Console.Write("Введите название курса: ");
+            string name = Console.ReadLine();
+            Course course = new Course(name);
+            university.AddCourse(course);
+            Console.WriteLine("Курс добавлен.");
+        }
+
+        private static void ViewCourseInfo(University university)
+        {
+            Console.Write("Введите название курса: ");
+            string name = Console.ReadLine();
+            Course course = university.FindCourse(name);
+            if (course != null)
+            {
+                course.DisplayInfo();
+            }
+            else
+            {
+                Console.WriteLine("Курс не найден.");
+            }
+        }
+
+        private static void ViewStudentsInCourse(University university)
+        {
+            Console.Write("Введите название курса: ");
+            string name = Console.ReadLine();
+            Course course = university.FindCourse(name);
+            if (course != null)
+            {
+                course.DisplayInfo(); 
+            }
+            else
+            {
+                Console.WriteLine("Курс не найден.");
+            }
+        }
+    }
 }
