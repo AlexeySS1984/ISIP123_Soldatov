@@ -3,15 +3,12 @@ using System.Collections.Generic;
 
 namespace UniversityManagementSystem
 {
-    // Абстрактный класс Person для демонстрации абстракции и наследования
     public abstract class Person
     {
-        // Инкапсуляция: приватные поля
         private string name;
         private int age;
         private string contactInfo;
 
-        // Публичные свойства для доступа к приватным полям
         public string Name
         {
             get { return name; }
@@ -30,7 +27,6 @@ namespace UniversityManagementSystem
             set { contactInfo = value; }
         }
 
-        // Конструктор
         protected Person(string name, int age, string contactInfo)
         {
             Name = name;
@@ -38,7 +34,37 @@ namespace UniversityManagementSystem
             ContactInfo = contactInfo;
         }
 
-        // Абстрактный метод для полиморфизма: каждый подкласс реализует свой способ отображения информации
         public abstract void DisplayInfo();
+    }
+
+    public class Student : Person
+    {
+        private List<Course> enrolledCourses = new List<Course>();
+
+        public Student(string name, int age, string contactInfo) : base(name, age, contactInfo) { }
+
+        public void EnrollInCourse(Course course)
+        {
+            if (!enrolledCourses.Contains(course))
+            {
+                enrolledCourses.Add(course);
+                course.AddStudent(this);
+            }
+        }
+
+        public void DisplayEnrolledCourses()
+        {
+            Console.WriteLine($"Курсы, на которые записан {Name}:");
+            foreach (var course in enrolledCourses)
+            {
+                Console.WriteLine($"- {course.Name}");
+            }
+        }
+
+        public override void DisplayInfo()
+        {
+            Console.WriteLine($"Студент: {Name}, Возраст: {Age}, Контакт: {ContactInfo}");
+            DisplayEnrolledCourses();
+        }
     }
 }
