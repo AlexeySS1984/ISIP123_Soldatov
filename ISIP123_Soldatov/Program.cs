@@ -26,7 +26,6 @@ namespace UniversityManagementSystem
             get { return contactInfo; }
             set { contactInfo = value; }
         }
-
         protected Person(string name, int age, string contactInfo)
         {
             Name = name;
@@ -43,13 +42,21 @@ namespace UniversityManagementSystem
 
         public Student(string name, int age, string contactInfo) : base(name, age, contactInfo) { }
 
-        public void EnrollInCourse(Course course)
+        public bool EnrollInCourse(Course course)
         {
             if (!enrolledCourses.Contains(course))
             {
-                enrolledCourses.Add(course);
-                course.AddStudent(this);
+                if (course.AddStudent(this))
+                {
+                    enrolledCourses.Add(course);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
+            return false;
         }
 
         public void DisplayEnrolledCourses()
@@ -61,12 +68,30 @@ namespace UniversityManagementSystem
             }
         }
 
+        public double CalculateAverageGrade()
+        {
+            double total = 0;
+            int count = 0;
+            foreach (var course in enrolledCourses)
+            {
+                double grade;
+                if (course.GetGrade(this, out grade))
+                {
+                    total += grade;
+                    count++;
+                }
+            }
+            return count > 0 ? total / count : 0;
+        }
+
         public override void DisplayInfo()
         {
             Console.WriteLine($"Студент: {Name}, Возраст: {Age}, Контакт: {ContactInfo}");
             DisplayEnrolledCourses();
+            Console.WriteLine($"Средний балл: {CalculateAverageGrade():F2}");
         }
     }
+
     public class Teacher : Person
     {
         private List<Course> taughtCourses = new List<Course>();
@@ -97,11 +122,14 @@ namespace UniversityManagementSystem
             DisplayTaughtCourses();
         }
     }
+
     public class Course
     {
         private string name;
         private Teacher teacher;
         private List<Student> students = new List<Student>();
+        private Dictionary<Student, double> studentGrades = new Dictionary<Student, double>();
+        private int maxStudents;
 
         public string Name
         {
@@ -111,9 +139,10 @@ namespace UniversityManagementSystem
 
         public Teacher Teacher => teacher;
 
-        public Course(string name)
+        public Course(string name, int maxStudents = 30)
         {
             Name = name;
+            this.maxStudents = maxStudents;
         }
 
         public void AssignTeacher(Teacher teacher)
@@ -121,17 +150,32 @@ namespace UniversityManagementSystem
             this.teacher = teacher;
         }
 
-        public void AddStudent(Student student)
+        public bool AddStudent(Student student)
         {
-            if (!students.Contains(student))
+            if (!students.Contains(student) && students.Count < maxStudents)
             {
                 students.Add(student);
+                return true;
             }
+            return false;
+        }
+
+        public void SetGrade(Student student, double grade)
+        {
+            if (students.Contains(student))
+            {
+                studentGrades[student] = grade;
+            }
+        }
+
+        public bool GetGrade(Student student, out double grade)
+        {
+            return studentGrades.TryGetValue(student, out grade);
         }
 
         public void DisplayInfo()
         {
-            Console.WriteLine($"Курс: {Name}");
+            Console.WriteLine($"Курс: {Name} (Макс. студентов: {maxStudents}, Записано: {students.Count})");
             if (teacher != null)
             {
                 Console.WriteLine($"Преподаватель: {teacher.Name}");
@@ -143,13 +187,15 @@ namespace UniversityManagementSystem
             Console.WriteLine("Записанные студенты:");
             foreach (var student in students)
             {
-                Console.WriteLine($"- {student.Name}");
+                double grade;
+                string gradeStr = GetGrade(student, out grade) ? grade.ToString("F2") : "Не выставлена";
+                Console.WriteLine($"- {student.Name} (Оценка: {gradeStr})");
             }
         }
     }
+
     public class University
     {
-        // Инкапсуляция: приватные списки
         private List<Student> students = new List<Student>();
         private List<Teacher> teachers = new List<Teacher>();
         private List<Course> courses = new List<Course>();
@@ -214,15 +260,16 @@ namespace UniversityManagementSystem
             return courses.Find(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
     }
+
     class Program
     {
         static void Main(string[] args)
         {
             University university = new University();
 
-            Teacher teacher1 = new Teacher("Александр Пестов", 1488, "alexandr@example.com");
+            Teacher teacher1 = new Teacher("Максим Гордов", 1488, "maxim@example.com");
             university.AddTeacher(teacher1);
-            Teacher teacher2 = new Teacher("Максим Гордов", 67, "maxim@example.com");
+            Teacher teacher2 = new Teacher("ВВГ", 67, "vvg@example.com");
             university.AddTeacher(teacher2);
 
             Student student1 = new Student("Алексей Сидоров", 20, "alexey@example.com");
@@ -232,11 +279,11 @@ namespace UniversityManagementSystem
             Student student3 = new Student("Дмитрий Николаев", 19, "dmitry@example.com");
             university.AddStudent(student3);
 
-            Course course1 = new Course("Разработка программных модулей");
+            Course course1 = new Course("разработка программных модулей", 2); // Лимит 2 для теста
             university.AddCourse(course1);
-            Course course2 = new Course("Физика");
+            Course course2 = new Course("Физика", 30);
             university.AddCourse(course2);
-            Course course3 = new Course("Информатика");
+            Course course3 = new Course("Информатика", 30);
             university.AddCourse(course3);
 
             teacher1.AssignToCourse(course1);
@@ -249,6 +296,13 @@ namespace UniversityManagementSystem
             student2.EnrollInCourse(course3);
             student3.EnrollInCourse(course2);
             student3.EnrollInCourse(course3);
+
+            course1.SetGrade(student1, 4.5);
+            course1.SetGrade(student2, 5.0);
+            course2.SetGrade(student1, 3.8);
+            course2.SetGrade(student3, 4.2);
+            course3.SetGrade(student2, 4.7);
+            course3.SetGrade(student3, 5.0);
 
             bool running = true;
 
@@ -269,7 +323,9 @@ namespace UniversityManagementSystem
                 Console.WriteLine("11. Просмотреть всех студентов");
                 Console.WriteLine("12. Просмотреть всех преподавателей");
                 Console.WriteLine("13. Просмотреть все курсы");
-                Console.WriteLine("14. Выход");
+                Console.WriteLine("14. Выставить оценку студенту на курсе");
+                Console.WriteLine("15. Просмотреть средний балл студента");
+                Console.WriteLine("16. Выход");
                 Console.Write("Выберите опцию: ");
 
                 string choice = Console.ReadLine();
@@ -316,6 +372,12 @@ namespace UniversityManagementSystem
                         university.DisplayAllCourses();
                         break;
                     case "14":
+                        SetGrade(university);
+                        break;
+                    case "15":
+                        ViewStudentAverageGrade(university);
+                        break;
+                    case "16":
                         running = false;
                         break;
                     default:
@@ -376,8 +438,14 @@ namespace UniversityManagementSystem
                 return;
             }
 
-            student.EnrollInCourse(course);
-            Console.WriteLine("Студент записан на курс.");
+            if (student.EnrollInCourse(course))
+            {
+                Console.WriteLine("Студент записан на курс.");
+            }
+            else
+            {
+                Console.WriteLine("Не удалось записать студента: курс заполнен или студент уже записан.");
+            }
         }
 
         private static void ViewStudentCourses(University university)
@@ -451,7 +519,10 @@ namespace UniversityManagementSystem
         {
             Console.Write("Введите название курса: ");
             string name = Console.ReadLine();
-            Course course = new Course(name);
+            Console.Write("Введите максимальное количество студентов (по умолчанию 30): ");
+            string maxStr = Console.ReadLine();
+            int max = string.IsNullOrEmpty(maxStr) ? 30 : int.Parse(maxStr);
+            Course course = new Course(name, max);
             university.AddCourse(course);
             Console.WriteLine("Курс добавлен.");
         }
@@ -483,6 +554,48 @@ namespace UniversityManagementSystem
             else
             {
                 Console.WriteLine("Курс не найден.");
+            }
+        }
+
+        private static void SetGrade(University university)
+        {
+            Console.Write("Введите имя студента: ");
+            string studentName = Console.ReadLine();
+            Student student = university.FindStudent(studentName);
+            if (student == null)
+            {
+                Console.WriteLine("Студент не найден.");
+                return;
+            }
+
+            Console.Write("Введите название курса: ");
+            string courseName = Console.ReadLine();
+            Course course = university.FindCourse(courseName);
+            if (course == null)
+            {
+                Console.WriteLine("Курс не найден.");
+                return;
+            }
+
+            Console.Write("Введите оценку (например, 4.5): ");
+            double grade = double.Parse(Console.ReadLine());
+
+            course.SetGrade(student, grade);
+            Console.WriteLine("Оценка выставлена.");
+        }
+
+        private static void ViewStudentAverageGrade(University university)
+        {
+            Console.Write("Введите имя студента: ");
+            string name = Console.ReadLine();
+            Student student = university.FindStudent(name);
+            if (student != null)
+            {
+                Console.WriteLine($"Средний балл {student.Name}: {student.CalculateAverageGrade():F2}");
+            }
+            else
+            {
+                Console.WriteLine("Студент не найден.");
             }
         }
     }
