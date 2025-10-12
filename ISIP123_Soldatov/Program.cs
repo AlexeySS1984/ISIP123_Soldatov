@@ -67,15 +67,12 @@ namespace UniversityManagementSystem
             DisplayEnrolledCourses();
         }
     }
-    // Класс Teacher, наследующий от Person
     public class Teacher : Person
     {
-        // Инкапсуляция: приватный список курсов, которые ведет преподаватель
         private List<Course> taughtCourses = new List<Course>();
 
         public Teacher(string name, int age, string contactInfo) : base(name, age, contactInfo) { }
 
-        // Метод для назначения на курс
         public void AssignToCourse(Course course)
         {
             if (!taughtCourses.Contains(course))
@@ -85,7 +82,6 @@ namespace UniversityManagementSystem
             }
         }
 
-        // Метод для просмотра курсов преподавателя
         public void DisplayTaughtCourses()
         {
             Console.WriteLine($"Курсы, которые ведет {Name}:");
@@ -95,11 +91,60 @@ namespace UniversityManagementSystem
             }
         }
 
-        // Полиморфизм: переопределение метода DisplayInfo
         public override void DisplayInfo()
         {
             Console.WriteLine($"Преподаватель: {Name}, Возраст: {Age}, Контакт: {ContactInfo}");
             DisplayTaughtCourses();
+        }
+    }
+    public class Course
+    {
+        private string name;
+        private Teacher teacher;
+        private List<Student> students = new List<Student>();
+
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+
+        public Teacher Teacher => teacher;
+
+        public Course(string name)
+        {
+            Name = name;
+        }
+
+        public void AssignTeacher(Teacher teacher)
+        {
+            this.teacher = teacher;
+        }
+
+        public void AddStudent(Student student)
+        {
+            if (!students.Contains(student))
+            {
+                students.Add(student);
+            }
+        }
+
+        public void DisplayInfo()
+        {
+            Console.WriteLine($"Курс: {Name}");
+            if (teacher != null)
+            {
+                Console.WriteLine($"Преподаватель: {teacher.Name}");
+            }
+            else
+            {
+                Console.WriteLine("Преподаватель не назначен.");
+            }
+            Console.WriteLine("Записанные студенты:");
+            foreach (var student in students)
+            {
+                Console.WriteLine($"- {student.Name}");
+            }
         }
     }
 }
