@@ -147,4 +147,71 @@ namespace UniversityManagementSystem
             }
         }
     }
+    public class University
+    {
+        // Инкапсуляция: приватные списки
+        private List<Student> students = new List<Student>();
+        private List<Teacher> teachers = new List<Teacher>();
+        private List<Course> courses = new List<Course>();
+
+        public void AddStudent(Student student)
+        {
+            students.Add(student);
+        }
+
+        public void AddTeacher(Teacher teacher)
+        {
+            teachers.Add(teacher);
+        }
+
+        public void AddCourse(Course course)
+        {
+            courses.Add(course);
+        }
+
+        public void DisplayAllStudents()
+        {
+            Console.WriteLine("Все студенты:");
+            foreach (var student in students)
+            {
+                student.DisplayInfo();
+                Console.WriteLine();
+            }
+        }
+
+        public void DisplayAllTeachers()
+        {
+            Console.WriteLine("Все преподаватели:");
+            foreach (var teacher in teachers)
+            {
+                teacher.DisplayInfo();
+                Console.WriteLine();
+            }
+        }
+
+        public void DisplayAllCourses()
+        {
+            Console.WriteLine("Все курсы:");
+            foreach (var course in courses)
+            {
+                course.DisplayInfo();
+                Console.WriteLine();
+            }
+        }
+
+        public Student FindStudent(string name)
+        {
+            return students.Find(s => s.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public Teacher FindTeacher(string name)
+        {
+            return teachers.Find(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public Course FindCourse(string name)
+        {
+            return courses.Find(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+    }
 }
