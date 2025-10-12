@@ -219,6 +219,37 @@ namespace UniversityManagementSystem
         static void Main(string[] args)
         {
             University university = new University();
+
+            Teacher teacher1 = new Teacher("Александр Пестов", 1488, "alexandr@example.com");
+            university.AddTeacher(teacher1);
+            Teacher teacher2 = new Teacher("Максим Гордов", 67, "maxim@example.com");
+            university.AddTeacher(teacher2);
+
+            Student student1 = new Student("Алексей Сидоров", 20, "alexey@example.com");
+            university.AddStudent(student1);
+            Student student2 = new Student("Ольга Кузнецова", 21, "olga@example.com");
+            university.AddStudent(student2);
+            Student student3 = new Student("Дмитрий Николаев", 19, "dmitry@example.com");
+            university.AddStudent(student3);
+
+            Course course1 = new Course("Разработка программных модулей");
+            university.AddCourse(course1);
+            Course course2 = new Course("Физика");
+            university.AddCourse(course2);
+            Course course3 = new Course("Информатика");
+            university.AddCourse(course3);
+
+            teacher1.AssignToCourse(course1);
+            teacher1.AssignToCourse(course3);
+            teacher2.AssignToCourse(course2);
+
+            student1.EnrollInCourse(course1);
+            student1.EnrollInCourse(course2);
+            student2.EnrollInCourse(course1);
+            student2.EnrollInCourse(course3);
+            student3.EnrollInCourse(course2);
+            student3.EnrollInCourse(course3);
+
             bool running = true;
 
             while (running)
