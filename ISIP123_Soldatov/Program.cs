@@ -67,4 +67,39 @@ namespace UniversityManagementSystem
             DisplayEnrolledCourses();
         }
     }
+    // Класс Teacher, наследующий от Person
+    public class Teacher : Person
+    {
+        // Инкапсуляция: приватный список курсов, которые ведет преподаватель
+        private List<Course> taughtCourses = new List<Course>();
+
+        public Teacher(string name, int age, string contactInfo) : base(name, age, contactInfo) { }
+
+        // Метод для назначения на курс
+        public void AssignToCourse(Course course)
+        {
+            if (!taughtCourses.Contains(course))
+            {
+                taughtCourses.Add(course);
+                course.AssignTeacher(this);
+            }
+        }
+
+        // Метод для просмотра курсов преподавателя
+        public void DisplayTaughtCourses()
+        {
+            Console.WriteLine($"Курсы, которые ведет {Name}:");
+            foreach (var course in taughtCourses)
+            {
+                Console.WriteLine($"- {course.Name}");
+            }
+        }
+
+        // Полиморфизм: переопределение метода DisplayInfo
+        public override void DisplayInfo()
+        {
+            Console.WriteLine($"Преподаватель: {Name}, Возраст: {Age}, Контакт: {ContactInfo}");
+            DisplayTaughtCourses();
+        }
+    }
 }
