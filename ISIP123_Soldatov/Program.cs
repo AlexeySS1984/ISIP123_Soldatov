@@ -1,140 +1,309 @@
-﻿Console.WriteLine("Введите количество операций (от 2 до 40):");
-int n;
-while (!int.TryParse(Console.ReadLine(), out n) || n < 2 || n > 40)
-{
-    Console.WriteLine("Ошибка! Введите число от 2 до 40:");
-}
+﻿using System;
 
-string[] names = new string[n];
-int[] prices = new int[n];
-
-for (int i = 0; i < n; i++)
+namespace RoguelikeGame
 {
-    Console.WriteLine($"Введите данные для операции {i + 1} (формат: Название;Сумма):");
-    string input = Console.ReadLine();
-    string[] parts = input.Split(';');
-    while (parts.Length != 2 || !int.TryParse(parts[1].Trim(), out int price))
+    class Program
     {
-        Console.WriteLine("Ошибка! Формат: Название;Сумма. Повторите ввод:");
-        input = Console.ReadLine();
-        parts = input.Split(';');
+        static void Main(string[] args)
+        {
+            Game game = new Game();
+            game.Run();
+        }
     }
-    names[i] = parts[0].Trim();
-    prices[i] = int.Parse(parts[1].Trim());
-}
 
-while (true)
-{
-    Console.WriteLine("\nМеню:");
-    Console.WriteLine("1. Вывод данных");
-    Console.WriteLine("2. Статистика (среднее, максимальное, минимальное, сумма)");
-    Console.WriteLine("3. Сортировка по цене (пузырьковая сортировка)");
-    Console.WriteLine("4. Конвертация валюты");
-    Console.WriteLine("5. Поиск по названию");
-    Console.WriteLine("0. Выход");
-    Console.Write("Выберите пункт меню: ");
-
-    string choice = Console.ReadLine();
-
-    if (choice == "0") break;
-
-    switch (choice)
+    class Game
     {
-        case "1": 
-            Console.WriteLine("\nСписок трат:");
-            for (int i = 0; i < n; i++)
-            {
-                Console.WriteLine($"{names[i]}: {prices[i]} руб.");
-            }
-            break;
+        private Player player;
+        private Random rnd;
+        private int turn;
 
-        case "2":
-            if (n > 0)
+        // Базовые характеристики врагов
+        private const int BaseGoblinHP = 20;
+        private const int BaseGoblinAttack = 8;
+        private const int BaseGoblinDefense = 2;
+        private const double BaseGoblinCritChance = 0.2;
+
+        private const int BaseSkeletonHP = 30;
+        private const int BaseSkeletonAttack = 10;
+        private const int BaseSkeletonDefense = 3;
+
+        private const int BaseMageHP = 10;
+        private const int BaseMageAttack = 12;
+        private const int BaseMageDefense = 0;
+        private const double BaseMageFreezeChance = 0.25;
+
+        public Game()
+        {
+            rnd = new Random();
+            player = new Player(1000, new Weapon("Ржавый меч", 8), new Armor("Кожаная броня", 6));
+            turn = 1;
+        }
+
+        public void Run()
+        {
+            Console.WriteLine("Добро пожаловать в текстовую игру-рогалик!");
+            while (player.HP > 0)
             {
-                int sum = 0, max = prices[0], min = prices[0];
-                foreach (int price in prices)
+                Console.WriteLine($"\nХод {turn}. Ваше здоровье: {player.HP}/{player.MaxHP}");
+                if (turn % 10 == 0)
                 {
-                    sum += price;
-                    if (price > max) max = price;
-                    if (price < min) min = price;
+                    Enemy boss = GetRandomBoss();
+                    Console.WriteLine($"Вы встретили босса: {boss.Name}!");
+                    Fight(boss);
                 }
-                double avg = (double)sum / n;
-                Console.WriteLine($"\nСтатистика:");
-                Console.WriteLine($"Сумма: {sum} руб.");
-                Console.WriteLine($"Среднее: {avg:F2} руб.");
-                Console.WriteLine($"Максимальное: {max} руб.");
-                Console.WriteLine($"Минимальное: {min} руб.");
-            }
-            break;
-
-        case "3":
-            for (int i = 0; i < n - 1; i++)
-            {
-                for (int j = 0; j < n - i - 1; j++)
+                else
                 {
-                    if (prices[j] > prices[j + 1])
+                    if (rnd.Next(2) == 0)
                     {
-                        int tempPrice = prices[j];
-                        prices[j] = prices[j + 1];
-                        prices[j + 1] = tempPrice;
-                        string tempName = names[j];
-                        names[j] = names[j + 1];
-                        names[j + 1] = tempName;
+                        HandleChest();
+                    }
+                    else
+                    {
+                        Enemy enemy = GetRandomEnemy();
+                        Console.WriteLine($"Вы встретили врага: {enemy.Name}!");
+                        Fight(enemy);
                     }
                 }
+                turn++;
             }
-            Console.WriteLine("\nДанные отсортированы по цене.");
-            break;
+            Console.WriteLine("Вы погибли. Игра окончена.");
+        }
 
-        case "4": 
-            Console.WriteLine("\nВыберите валюту или введите курс:");
-            Console.WriteLine("1. USD (курс 90)");
-            Console.WriteLine("2. EUR (курс 100)");
-            Console.WriteLine("3. Ввести свой курс");
-            string currencyChoice = Console.ReadLine();
-            double rate = 1;
-
-            if (currencyChoice == "1") rate = 90;
-            else if (currencyChoice == "2") rate = 100;
-            else if (currencyChoice == "3")
+        private Enemy GetRandomEnemy()
+        {
+            int type = rnd.Next(3);
+            switch (type)
             {
-                Console.Write("Введите курс валюты (1 валюта = X рублей): ");
-                while (!double.TryParse(Console.ReadLine(), out rate) || rate <= 0)
+                case 0:
+                    return new Enemy("Гоблин", BaseGoblinHP, BaseGoblinAttack, BaseGoblinDefense, false, BaseGoblinCritChance, 0.0);
+                case 1:
+                    return new Enemy("Скелет", BaseSkeletonHP, BaseSkeletonAttack, BaseSkeletonDefense, true, 0.0, 0.0);
+                case 2:
+                    return new Enemy("Маг", BaseMageHP, BaseMageAttack, BaseMageDefense, false, 0.0, BaseMageFreezeChance);
+                default:
+                    throw new Exception("Неверный тип врага");
+            }
+        }
+
+        private Enemy GetRandomBoss()
+        {
+            int type = rnd.Next(4);
+            switch (type)
+            {
+                case 0: // ВВГ (Гоблин)
+                    return new Enemy("ВВГ", (int)(BaseGoblinHP * 2.0), (int)(BaseGoblinAttack * 1.5), (int)(BaseGoblinDefense * 1.2), false, BaseGoblinCritChance + 0.1, 0.0);
+                case 1: // Ковальский (Скелет)
+                    return new Enemy("Ковальский", (int)(BaseSkeletonHP * 2.5), (int)(BaseSkeletonAttack * 1.3), (int)(BaseSkeletonDefense * 1.4), true, 0.0, 0.0);
+                case 2: // Архимаг C++ (Маг)
+                    return new Enemy("Архимаг C++", (int)(BaseMageHP * 1.8), (int)(BaseMageAttack * 1.6), (int)(BaseMageDefense * 1.1), false, 0.0, BaseMageFreezeChance + 0.1);
+                case 3: // Пестов C-- (Скелет с заморозкой)
+                    return new Enemy("Пестов C--", (int)(BaseSkeletonHP * 1.3), (int)(BaseSkeletonAttack * 1.8), (int)(BaseSkeletonDefense * 0.6), true, 0.0, BaseMageFreezeChance + 0.15);
+                default:
+                    throw new Exception("Неверный тип босса");
+            }
+        }
+
+        private void HandleChest()
+        {
+            Console.WriteLine("Вы нашли сундук!");
+            int itemType = rnd.Next(3);
+            if (itemType == 0)
+            {
+                Console.WriteLine("Вы нашли лечебное зелье!");
+                player.HP = player.MaxHP;
+                Console.WriteLine("Ваше здоровье полностью восстановлено.");
+            }
+            else if (itemType == 1)
+            {
+                int newAttack = rnd.Next(5, 21);
+                Weapon newWeapon = new Weapon($"Меч силы {newAttack}", newAttack);
+                Console.WriteLine($"Вы нашли оружие: {newWeapon.Name} (Атака: {newWeapon.Attack})");
+                Console.WriteLine($"Текущее оружие: {player.Weapon.Name} (Атака: {player.Weapon.Attack})");
+                Console.Write("Хотите экипировать новое оружие? (y/n): ");
+                string choice = Console.ReadLine().ToLower();
+                if (choice == "y")
                 {
-                    Console.Write("Ошибка! Введите положительное число: ");
+                    player.Weapon = newWeapon;
+                    Console.WriteLine("Оружие экипировано.");
+                }
+                else
+                {
+                    Console.WriteLine("Оружие выброшено.");
                 }
             }
             else
             {
-                Console.WriteLine("Неверный выбор, используется курс 1:1.");
-            }
-
-            Console.WriteLine("\nТраты в выбранной валюте:");
-            for (int i = 0; i < n; i++)
-            {
-                double converted = prices[i] / rate;
-                Console.WriteLine($"{names[i]}: {converted:F2} валюты");
-            }
-            break;
-
-        case "5":
-            Console.Write("Введите название для поиска: ");
-            string search = Console.ReadLine().ToLower();
-            bool found = false;
-            Console.WriteLine("\nРезультаты поиска:");
-            for (int i = 0; i < n; i++)
-            {
-                if (names[i].ToLower().Contains(search))
+                int newDefense = rnd.Next(3, 16);
+                Armor newArmor = new Armor($"Броня защиты {newDefense}", newDefense);
+                Console.WriteLine($"Вы нашли броню: {newArmor.Name} (Защита: {newArmor.Defense})");
+                Console.WriteLine($"Текущая броня: {player.Armor.Name} (Защита: {player.Armor.Defense})");
+                Console.Write("Хотите экипировать новую броню? (y/n): ");
+                string choice = Console.ReadLine().ToLower();
+                if (choice == "y")
                 {
-                    Console.WriteLine($"{names[i]}: {prices[i]} руб.");
-                    found = true;
+                    player.Armor = newArmor;
+                    Console.WriteLine("Броня экипирована.");
+                }
+                else
+                {
+                    Console.WriteLine("Броня выброшена.");
                 }
             }
-            if (!found) Console.WriteLine("Ничего не найдено.");
-            break;
+        }
 
-        default:
-            Console.WriteLine("Неверный выбор. Попробуйте снова.");
-            break;
+        private void Fight(Enemy enemy)
+        {
+            Console.WriteLine($"Бой начинается! Здоровье врага: {enemy.HP}");
+            bool defending = false;
+            while (player.HP > 0 && enemy.HP > 0)
+            {
+                if (player.IsFrozen)
+                {
+                    Console.WriteLine("Вы заморожены и пропускаете ход!");
+                    player.IsFrozen = false;
+                }
+                else
+                {
+                    Console.Write("Выберите действие: (a) Атака или (d) Защита: ");
+                    string choice = Console.ReadLine().ToLower();
+                    if (choice == "a")
+                    {
+                        int damage = Math.Max(0, player.Weapon.Attack - enemy.Defense); // Локальная переменная
+                        enemy.HP -= damage;
+                        Console.WriteLine($"Вы атакуете, нанося {damage} урона. Здоровье врага: {enemy.HP}");
+                    }
+                    else if (choice == "d")
+                    {
+                        defending = true;
+                        Console.WriteLine("Вы защищаетесь.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Неверный выбор. Вы ничего не делаете.");
+                    }
+                }
+
+                if (enemy.HP <= 0)
+                {
+                    Console.WriteLine("Враг повержен!");
+                    break;
+                }
+
+                // Атака врага
+                int enemyDamage = enemy.GetDamage(rnd); // Используем другое имя для ясности
+                if (defending)
+                {
+                    defending = false;
+                    if (rnd.Next(100) < 40)
+                    {
+                        enemyDamage = 0; // Переопределяем damage как 0 при уклонении
+                        Console.WriteLine("Вы уклонились от атаки!");
+                    }
+                    else
+                    {
+                        double blockPercent = rnd.Next(70, 101) / 100.0;
+                        int block = (int)(blockPercent * player.Armor.Defense);
+                        if (!enemy.IgnoreDefense)
+                        {
+                            enemyDamage = Math.Max(0, enemyDamage - block);
+                        }
+                        Console.WriteLine($"Вы заблокировали часть урона.");
+                    }
+                }
+
+                if (enemyDamage > 0)
+                {
+                    player.HP -= enemyDamage;
+                    Console.WriteLine($"Враг атакует, нанося {enemyDamage} урона. Ваше здоровье: {player.HP}");
+                }
+
+                // Применение заморозки, если есть
+                if (enemy.FreezeChance > 0 && rnd.NextDouble() < enemy.FreezeChance)
+                {
+                    player.IsFrozen = true;
+                    Console.WriteLine("Вы заморожены!");
+                }
+            }
+
+            if (player.HP <= 0)
+            {
+                Console.WriteLine("Вы были побеждены.");
+            }
+        }
+    }
+
+    class Player
+    {
+        public int HP { get; set; }
+        public int MaxHP { get; set; }
+        public Weapon Weapon { get; set; }
+        public Armor Armor { get; set; }
+        public bool IsFrozen { get; set; }
+
+        public Player(int maxHP, Weapon weapon, Armor armor)
+        {
+            MaxHP = maxHP;
+            HP = maxHP;
+            Weapon = weapon;
+            Armor = armor;
+            IsFrozen = false;
+        }
+    }
+
+    class Weapon
+    {
+        public string Name { get; }
+        public int Attack { get; }
+
+        public Weapon(string name, int attack)
+        {
+            Name = name;
+            Attack = attack;
+        }
+    }
+
+    class Armor
+    {
+        public string Name { get; }
+        public int Defense { get; }
+
+        public Armor(string name, int defense)
+        {
+            Name = name;
+            Defense = defense;
+        }
+    }
+
+    class Enemy
+    {
+        public string Name { get; }
+        public int HP { get; set; }
+        public int Attack { get; }
+        public int Defense { get; }
+        public bool IgnoreDefense { get; }
+        public double CritChance { get; }
+        public double FreezeChance { get; }
+
+        public Enemy(string name, int hp, int attack, int defense, bool ignoreDefense, double critChance, double freezeChance)
+        {
+            Name = name;
+            HP = hp;
+            Attack = attack;
+            Defense = defense;
+            IgnoreDefense = ignoreDefense;
+            CritChance = critChance;
+            FreezeChance = freezeChance;
+        }
+
+        public int GetDamage(Random rnd)
+        {
+            int damage = Attack;
+            if (CritChance > 0 && rnd.NextDouble() < CritChance)
+            {
+                damage *= 2;
+                Console.WriteLine("Критический удар!");
+            }
+            return damage;
+        }
     }
 }
